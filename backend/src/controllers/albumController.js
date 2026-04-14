@@ -33,7 +33,8 @@ const createAlbum = asyncHandler(async (req, res) => {
 
   const artist = await artistService.findOrCreateArtistByName(artistInput);
 
-  const coverUrl = req.file ? `/uploads/covers/${req.file.filename}` : null;
+  // Gunakan URL dari Cloudinary, bukan path lokal
+  const coverUrl = req.file ? req.file.path : null;
 
   const album = await albumService.createAlbum({
     userId: req.user.id,

@@ -12,7 +12,10 @@ import PlayerBar from './components/player/PlayerBar';
 
 function toPublicUrl(url) {
   if (!url) return '';
-  if (url.startsWith('http')) return url;
+  // Jika sudah URL lengkap (Cloudinary atau URL lain), gunakan langsung
+  if (url.startsWith('http://') || url.startsWith('https://')) return url;
+  
+  // Jika masih path lokal (untuk data lama), tambahkan base URL
   const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
   const base = apiBase.replace(/\/api\/?$/, '');
   return `${base}${url}`;

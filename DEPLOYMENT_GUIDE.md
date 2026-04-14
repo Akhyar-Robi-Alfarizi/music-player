@@ -54,6 +54,16 @@ CLOUDINARY_API_SECRET=your_api_secret
 3. Redeploy aplikasi setelah menambahkan variables
 4. Cek logs di platform hosting untuk error detail
 
+### Gambar Cover Tidak Tampil (Icon Placeholder Muncul)
+**Penyebab**: 
+- Data lama masih menggunakan path lokal (`/uploads/...`)
+- File tidak ada di Cloudinary
+
+**Solusi**:
+1. **Untuk data baru**: Pastikan kredensial Cloudinary sudah benar, lalu upload ulang
+2. **Untuk data lama**: Lihat file `backend/MIGRATION_GUIDE.md` untuk cara migrasi
+3. **Quick fix**: Hapus dan upload ulang album/lagu yang bermasalah
+
 ### Error: "File audio tidak valid"
 **Penyebab**: Format file tidak didukung
 
