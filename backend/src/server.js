@@ -14,32 +14,28 @@ const songRoutes = require('./routes/songRoutes');
 const app = express();
 const port = Number(process.env.PORT || 5000);
 
+// 1. Middleware dasar
 app.use(helmet({ crossOriginResourcePolicy: false }));
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const allowedOrigins = [
-  'http://localhost:5173',
-  'https://music-player-m663.vercel.app',
-  process.env.FRONTEND_URL,
-].filter(Boolean);
-
+// 2. Konfigurasi CORS Sederhana (Biar Vercel nggak bingung)
 app.use(cors({
-  origin(origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-
-    return callback(new Error('Not allowed by CORS'));
-  },
+  origin: [
+    'http://localhost:5173',
+    'https://music-player-m663.vercel.app',
+    process.env.FRONTEND_URL
+  ].filter(Boolean),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// Static files
 app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')));
 
+// 3. Routes
 app.get('/api/health', (_, res) => {
   return ok(res, { status: 'ok', app: 'mymusic-api' });
 });
@@ -49,31 +45,24 @@ app.use('/api/artists', artistRoutes);
 app.use('/api/albums', albumRoutes);
 app.use('/api/songs', songRoutes);
 
+// 4. Handle 404
 app.use((req, res) => {
   return fail(res, 404, 'Endpoint tidak ditemukan');
 });
 
+// 5. Error Handler Global
 app.use((err, req, res, next) => {
-  if (res.headersSent) {
-    return next(err);
-  }
-
+  if (res.headersSent) return next(err);
   const statusCode = err.statusCode || 500;
-  const payload = {
-    message: err.message || 'Terjadi kesalahan pada server',
-  };
-
-  if (err.detail) {
-    payload.detail = err.detail;
-  }
-
-  if (statusCode === 500 && err.message) {
-    payload.detail = err.message;
-  }
-
-  return fail(res, statusCode, payload.message, payload.detail);
+  return fail(res, statusCode, err.message || 'Terjadi kesalahan pada server', err.detail);
 });
 
-app.listen(port, () => {
-  console.log(`MyMusic API running at http://localhost:${port}`);
-});
+// 6. Jalankan server (Hanya untuk local development)
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, () => {
+    console.log(`MyMusic API running at http://localhost:${port}`);
+  });
+}
+
+// 7. WAJIB UNTUK VERCEL: Export aplikasi
+module.exports = app;
