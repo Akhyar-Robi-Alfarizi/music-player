@@ -1,44 +1,58 @@
-const path = require('path');
 const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+require('dotenv').config();
 
-const storage = multer.diskStorage({
-  destination(req, file, cb) {
+// 1. Konfigurasi Kredensial Cloudinary (diambil dari file .env)
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// 2. Setup Storage Dinamis (Bisa bedain Cover dan Audio)
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: async (req, file) => {
+    let folderName = 'mymusic/covers';
+    let resourceType = 'image'; // Default untuk cover album
+
+    // Kalau yang diupload adalah file audio/lagu
     if (file.fieldname === 'audio') {
-      cb(null, path.resolve(__dirname, '../../uploads/audio'));
-      return;
+      folderName = 'mymusic/audio';
+      resourceType = 'auto'; // Biarkan Cloudinary otomatis mendeteksi file audio
     }
-    cb(null, path.resolve(__dirname, '../../uploads/covers'));
-  },
-  filename(req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const baseName = path.basename(file.originalname, ext).replace(/\s+/g, '-').toLowerCase();
-    cb(null, `${Date.now()}-${baseName}${ext}`);
+
+    return {
+      folder: folderName,
+      resource_type: resourceType,
+    };
   },
 });
 
-function fileFilter(req, file, cb) {
+// 3. File Filter (Diambil dari kode aslimu biar tetap aman)
+const fileFilter = (req, file, cb) => {
   if (file.fieldname === 'audio') {
     if (!file.mimetype.startsWith('audio/')) {
-      cb(new Error('File audio tidak valid'));
-      return;
+      return cb(new Error('File audio tidak valid!'));
     }
   }
 
   if (file.fieldname === 'cover') {
     if (!file.mimetype.startsWith('image/')) {
-      cb(new Error('File cover tidak valid'));
-      return;
+      return cb(new Error('File cover tidak valid!'));
     }
   }
 
   cb(null, true);
-}
+};
 
+// 4. Inisialisasi Multer
 const upload = multer({
-  storage,
-  fileFilter,
+  storage: storage,
+  fileFilter: fileFilter,
   limits: {
-    fileSize: 50 * 1024 * 1024,
+    fileSize: 50 * 1024 * 1024, // Batas ukuran 50MB (Sesuai kodemu)
   },
 });
 
