@@ -1,0 +1,532 @@
+{
+  "info": {
+    "_postman_id": "f4d5f2b1-c6f5-4c95-8d4a-1f7a5f11a0aa",
+    "name": "MyMusic API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Collection untuk endpoint utama MyMusic API"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "albumId",
+      "value": "1"
+    },
+    {
+      "key": "albumName",
+      "value": "Album Baru"
+    },
+    {
+      "key": "songTitle",
+      "value": "Lagu Baru"
+    },
+    {
+      "key": "registerName",
+      "value": "Budi Santoso"
+    },
+    {
+      "key": "registerUsername",
+      "value": "budi"
+    },
+    {
+      "key": "registerEmail",
+      "value": "budi@mail.com"
+    },
+    {
+      "key": "registerPassword",
+      "value": "secret123"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const requestName = pm.info.requestName || '';",
+          "if (requestName === 'POST Register') {",
+          "  const userSuffix = Date.now().toString().slice(-6);",
+          "  pm.environment.set('registerName', `Budi ${userSuffix}`);",
+          "  pm.environment.set('registerUsername', `budi${userSuffix}`);",
+          "  pm.environment.set('registerEmail', `budi${userSuffix}@mail.com`);",
+          "  pm.environment.set('registerPassword', 'secret123');",
+          "}",
+          "",
+          "const randomSuffix = Date.now().toString().slice(-6);",
+          "pm.environment.set('albumName', `Album-${randomSuffix}`);",
+          "pm.environment.set('songTitle', `Song-${randomSuffix}`);"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET Health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"{{registerName}}\",\n  \"username\": \"{{registerUsername}}\",\n  \"email\": \"{{registerEmail}}\",\n  \"password\": \"{{registerPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"identifier\": \"{{registerUsername}}\",\n  \"password\": \"{{registerPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const data = pm.response.json();",
+                  "",
+                  "pm.test('Token tersedia di response', function () {",
+                  "  pm.expect(data.token).to.be.a('string').and.not.empty;",
+                  "});",
+                  "",
+                  "if (data.token) {",
+                  "  pm.environment.set('token', data.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "GET Me (Auth)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const data = pm.response.json();",
+                  "pm.test('Response memiliki user', function () {",
+                  "  pm.expect(data.user).to.be.an('object');",
+                  "  pm.expect(data.user.id).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Artists",
+      "item": [
+        {
+          "name": "GET Artists",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/artists",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "artists"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const data = pm.response.json();",
+                  "pm.test('Response memiliki artists array', function () {",
+                  "  pm.expect(data.artists).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Albums",
+      "item": [
+        {
+          "name": "GET Albums",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/albums",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "albums"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const data = pm.response.json();",
+                  "pm.test('Response memiliki albums array', function () {",
+                  "  pm.expect(data.albums).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "GET Album By Id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/albums/{{albumId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "albums",
+                "{{albumId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Album (Auth, form-data)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "{{albumName}}",
+                  "type": "text"
+                },
+                {
+                  "key": "artistKey",
+                  "value": "hindia",
+                  "type": "text"
+                },
+                {
+                  "key": "description",
+                  "value": "Deskripsi album",
+                  "type": "text"
+                },
+                {
+                  "key": "cover",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/albums",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "albums"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const data = pm.response.json();",
+                  "pm.test('Response memiliki album baru', function () {",
+                  "  pm.expect(data.album).to.be.an('object');",
+                  "  pm.expect(data.album.id).to.exist;",
+                  "});",
+                  "",
+                  "if (data.album && data.album.id) {",
+                  "  pm.environment.set('albumId', String(data.album.id));",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Songs",
+      "item": [
+        {
+          "name": "GET Songs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/songs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "songs"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "const data = pm.response.json();",
+                  "pm.test('Response memiliki songs array', function () {",
+                  "  pm.expect(data.songs).to.be.an('array');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "GET Songs (With Query)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}",
+                "disabled": true
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/songs?search=evaluasi&artist=hindia&mine=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "songs"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "evaluasi"
+                },
+                {
+                  "key": "artist",
+                  "value": "hindia"
+                },
+                {
+                  "key": "mine",
+                  "value": "1"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST Create Song (Auth, form-data)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "title",
+                  "value": "{{songTitle}}",
+                  "type": "text"
+                },
+                {
+                  "key": "artistKey",
+                  "value": "hindia",
+                  "type": "text"
+                },
+                {
+                  "key": "albumId",
+                  "value": "",
+                  "type": "text"
+                },
+                {
+                  "key": "audio",
+                  "type": "file",
+                  "src": ""
+                },
+                {
+                  "key": "cover",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/songs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "songs"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status code is 201', function () {",
+                  "  pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "const data = pm.response.json();",
+                  "pm.test('Response memiliki song baru', function () {",
+                  "  pm.expect(data.song).to.be.an('object');",
+                  "  pm.expect(data.song.id).to.exist;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    }
+  ]
+}
