@@ -10,6 +10,12 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+// Validasi konfigurasi Cloudinary
+if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+  console.error('⚠️  PERINGATAN: Kredensial Cloudinary belum dikonfigurasi di file .env');
+  console.error('   Silakan tambahkan CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, dan CLOUDINARY_API_SECRET');
+}
+
 // 2. Setup Storage Dinamis (Bisa bedain Cover dan Audio)
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,

@@ -34,8 +34,9 @@ const createSong = asyncHandler(async (req, res) => {
   const audioFile = req.files.audio[0];
   const coverFile = req.files.cover?.[0];
 
-  const fileUrl = `/uploads/audio/${audioFile.filename}`;
-  const coverUrl = coverFile ? `/uploads/covers/${coverFile.filename}` : null;
+  // Gunakan URL dari Cloudinary, bukan path lokal
+  const fileUrl = audioFile.path; // Cloudinary URL
+  const coverUrl = coverFile ? coverFile.path : null; // Cloudinary URL
 
   const song = await songService.createSong({
     userId: req.user.id,
