@@ -1,5 +1,4 @@
-CREATE DATABASE IF NOT EXISTS mymusic CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE mymusic;
+USE railway; -- Ganti 'railway' dengan nilai MYSQL_DATABASE dari dashboard Railway kamu
 
 CREATE TABLE IF NOT EXISTS users (
   id INT AUTO_INCREMENT PRIMARY KEY,
