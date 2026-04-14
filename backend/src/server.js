@@ -21,12 +21,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // 2. Konfigurasi CORS Sederhana (Biar Vercel nggak bingung)
+// Ganti konfigurasi CORS sebelumnya dengan ini:
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://music-player-m663.vercel.app',
-    process.env.FRONTEND_URL
-  ].filter(Boolean),
+  origin: true, // MANTRA SAPU JAGAT: Otomatis mengizinkan Frontend URL apapun
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
